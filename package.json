@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "version": "node version-bump.mjs && git add manifest.json versions.json"
+    "preversion": "node scripts/changelog.mjs check && npm test",
+    "version": "node version-bump.mjs && node scripts/changelog.mjs release && git add manifest.json versions.json CHANGELOG.md"
   },
   "keywords": [
     "obsidian",
