@@ -50,7 +50,8 @@ choke point keeps the failure modes in one testable place.
 | `unavailable` | TaskNotes not installed or disabled | Read-only from the vault |
 
 Fallback mode is genuinely useful rather than a blank chart: the catalog is read
-straight out of `.obsidian/plugins/tasknotes/data.json`, so the user's real statuses,
+straight out of TaskNotes' `data.json` in the vault's config folder (`.obsidian` by
+default, read through `vault.configDir` because users can rename it), so the user's real statuses,
 priorities, field mapping and identification rules are all still correct.
 
 ## Fields read

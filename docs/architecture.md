@@ -98,6 +98,10 @@ cli/                    Node only. Never imported by the plugin bundle.
   session.ts            Scope, snapshot, evaluate, plan. The pipeline both doors run.
   index.ts              Argument parsing and dispatch.
 
+scripts/
+  deploy.mjs            Copy a build into $OBSIDIAN_VAULT.
+  changelog.mjs         Keep a Changelog: check, release, notes, lint.
+
 mcp/
   server.ts             Four tools over cli/session.ts.
   main.ts               serveStdio entry.
@@ -291,6 +295,44 @@ deleting destroys a blank key the author wrote in the first. Blank `scheduled:` 
 `due:` keys are common in a TaskNotes vault and created keys are not, so blanking loses
 less. An empty value reads back as absent, so the difference is cosmetic — but only one
 of the two rules can lose a line somebody wrote.
+
+### The catalog is read live, never captured
+
+`ControllerHost.catalog` is a function, `() => TaskNotesCatalog`, and every use calls
+it. A view is built before the TaskNotes bridge has connected, so a catalog captured at
+construction is TaskNotes' shipped defaults: no user fields, and custom statuses
+falling back to raw values. The chart reloaded correctly afterwards and the filter bar
+did not, so a filter for the user's own `initiative` field never appeared — while the
+data report, reading the live catalog, insisted it existed. A function makes capturing
+the value a type error rather than a review comment.
+
+### An embedded chart owns its state
+
+A `tngantt` block inherits the user's calendar, capacity and display preferences, but
+not the main chart's state: filters, switched-off groups, collapsed groups. Each block
+builds its own settings object (`{ ...plugin.settings, ...block, hiddenGroups: [] }`),
+for the same reason a second Bases view must not share the first one's. Inheriting
+`hiddenGroups` once made a `groupBy: none` block render empty, because the main view
+had switched off the ungrouped bucket every task fell into.
+
+### A chart redraws when it is resized, and retries when detached
+
+The controller observes its own timeline with a `ResizeObserver`, because a chart can
+be built before its container has a size — a code block is rendered before Obsidian
+inserts it. And `render()` retries on the next frame, for about a second, when it finds
+the timeline detached: Obsidian's reading view detaches and re-attaches a note's
+sections within a single frame during layout, so a draw can land in that gap, and the
+chart comes back at exactly the size last reported, so the observer never fires again.
+A timeline that is attached but zero-sized is hidden, and waits for the observer.
+
+### Nothing an agent sends is trusted
+
+An agent reads note text, and note text can steer it. So the MCP server is bound to the
+vault it was started with and never takes a file path from the agent; and the
+frontmatter writer is safe on its own, whatever reaches it — it escapes every control
+character in a value, so `\n---\n` cannot close the block, and it refuses any key that
+could begin a line of its own. `parseProposal` refuses the same inputs earlier, with a
+reason the agent can act on, but the writer does not rely on that.
 
 ### An undo must be applicable
 

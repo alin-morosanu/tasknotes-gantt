@@ -9,18 +9,20 @@ the plan those fields already describe, and lets you change it by dragging.
 - [Editing the plan](#editing-the-plan)
 - [Critical path and conflicts](#critical-path-and-conflicts)
 - [Capacity](#capacity)
+- [Charts inside a note](#charts-inside-a-note)
 - [Baselines and progress](#baselines-and-progress)
 - [Export](#export)
 - [Keyboard and touch](#keyboard-and-touch)
 - [Settings reference](#settings-reference)
 - [Troubleshooting](#troubleshooting)
+- [Updating](#updating)
 
 ## Getting started
 
 **Requirements:** Obsidian 1.10.0 or later, and TaskNotes 4.12 or later for editing.
 Older TaskNotes versions, or TaskNotes disabled, give you a read-only chart.
 
-There are two ways to open a chart.
+There are three ways to see a chart.
 
 **The standalone tab** — the Gantt icon in the ribbon, or the command **Open chart**.
 It covers the whole vault and has its own filter bar. Use it for planning across
@@ -34,6 +36,10 @@ want a chart of a query you have already written.
 Per-view options — grouping, sort, timescale, dependency lines and arrowheads — are
 stored in the `.base` file, so two Gantt views of different bases can be configured
 differently without affecting each other.
+
+**A `tngantt` block in a note** — a live, scoped chart wherever you put it, such as a
+project note. It is read-only by default. See
+[Charts inside a note](#charts-inside-a-note).
 
 ## Reading the chart
 
@@ -85,8 +91,14 @@ the note.
 The filter row narrows the chart to what you care about.
 
 - The **search box** matches task names.
-- Each **facet menu** — project, status, priority, context, tag, assignee, and every
-  user field you have defined in TaskNotes — selects values to keep.
+- Each **facet menu** — project, status, priority, context, tag, the resource property,
+  and every user field you have defined in TaskNotes — selects values to keep. A field
+  of your own, such as `initiative`, gets its own menu automatically, after the
+  built-in ones. When the window is narrow the menus wrap onto a second row.
+
+The resource-property menu is named after the property: **Assignee** by default, or the
+property's own name if you change it. If that property is one the bar already lists —
+`contexts`, say — it is not offered twice.
 
 Values within one facet are ORed; facets are ANDed. So *the in-progress and up-next
 tasks, on these two projects, under the Company Growth initiative* is three facets,
@@ -98,7 +110,9 @@ would return nothing is not listed. Absence is selectable: **No project** finds 
 nobody has filed, **No initiative** finds the ones with that field blank.
 
 **Grouping** is separate from filtering. Group by project, status, priority, context or
-assignee, or turn it off for a flat list.
+the resource property, or turn it off for a flat list. The resource grouping reads
+**Assignee** by default, or **Resource (contexts)** — naming the property — if you have
+pointed it at something else.
 
 Every group has a **checkbox** to switch it out of the chart, and the toolbar has one
 button to **collapse or expand every group** at once. A switched-off group keeps its
@@ -249,7 +263,7 @@ groupBy: none
 ````
 
 Filters are the same ones the filter bar offers: `project`, `status`, `priority`,
-`context`, `tag`, `assignee`, and any user field your TaskNotes setup defines
+`context`, `tag`, `assignee` (the resource property), and any user field your TaskNotes setup defines
 (`initiative:` in the reference vault). Comma-separate for several values, and use
 `none` for the "no project" bucket. `text:` searches titles.
 
@@ -267,6 +281,34 @@ you were only scrolling past.
 
 If a line cannot be read — a misspelt option, or a filter matching no task — the block
 says so in place of the chart rather than quietly drawing the wrong thing.
+
+**What a block takes from your settings.** Your working calendar, capacity and display
+preferences, unless the block overrides them. Not the main chart's state: its filters,
+switched-off groups and collapsed groups stay in the main chart. A block shows what its
+own lines ask for, so the same block looks the same in every vault.
+
+A few more examples:
+
+````markdown
+```tngantt
+initiative: Company Growth
+status: backlog, in-progress
+zoom: month
+critical: true
+```
+````
+
+````markdown
+```tngantt
+project: none
+groupBy: priority
+height: 240
+```
+````
+
+The first is one initiative's open work across all its projects, with the critical
+path outlined. The second is every task nobody has filed under a project, grouped by
+priority.
 
 ## Baselines and progress
 
@@ -327,7 +369,7 @@ On a touch screen, pinch to zoom the timescale.
 
 ## Settings reference
 
-### Editing
+The first two settings are unheaded, at the top of the tab.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -364,6 +406,12 @@ On a touch screen, pinch to zoom the timescale.
 | Flag dependency conflicts | on | Mark tasks scheduled too early |
 | Cascade dependents | off | Dragging a bar also pushes what depends on it |
 
+### Appearance
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| Row height | 28 px | Height of each row in the chart and task list |
+
 ### Baseline and progress
 
 | Setting | Default | What it does |
@@ -380,20 +428,44 @@ On a touch screen, pinch to zoom the timescale.
 | Capacity per day | 480 min | Working minutes a resource absorbs per day |
 | Capacity overrides | none | `Name = minutes`, one per line |
 
-### Appearance, grouping and export
+### Export
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Row height | 28 px | |
-| Resource property | `assignee` | Property the load chart, resource grouping and levelling measure against |
-| Show archived tasks | off | |
 | Export folder | vault root | Where exports are saved |
+
+### Grouping
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| Resource property | `assignee` | Property the load chart, resource grouping, resource filter and levelling measure against. Any property works — `contexts`, `projects`, or one of your own |
+| Show archived tasks | off | Include tasks TaskNotes has archived |
 
 ## Troubleshooting
 
 **Run the data report first.** The command **Write data report** creates a note
-describing everything the plugin can see: task counts, date coverage, dependency types,
-dangling links and cycles. Most questions below are answered by it.
+describing everything the plugin can see: the connection to TaskNotes, your statuses
+and user fields, the filter menus it will offer and how many values each has, task
+counts, date coverage, dependency types, dangling links and cycles. Most questions
+below are answered by it.
+
+**A filter for one of my own fields is missing.** Check the report's **Filter facets**
+table. If the field is listed there, reload Obsidian. If it is not, the field is not
+defined in TaskNotes' settings — a frontmatter property only becomes a filter once
+TaskNotes knows about it as a user field.
+
+**The levelling banner never appears.** It only appears while the load chart is on and
+a resource is actually over capacity. The load-chart banner says which property is
+being measured and how many tasks carry it; if that is very few, set **Resource
+property** to something your tasks fill in, such as `contexts`.
+
+**A `tngantt` block shows an error instead of a chart.** That is the block telling you
+which line it could not use — a misspelt option, a value outside the allowed list, or a
+filter that matches no task. Fix the line and the chart appears.
+
+**A `tngantt` block shows no tasks.** Its filters match tasks that are all hidden by
+something else in the block — `completed: false`, or `archived` left off for archived
+work. Remove options one at a time to find which.
 
 **A task is missing.** Check that it carries your TaskNotes task tag (`#task` by
 default), is not in an excluded folder, and is not filtered out — the banner reports how
@@ -420,3 +492,14 @@ not exist. The tasks are still shown — either create the note or fix the links
 
 **A banner reports a circular dependency.** Two or more tasks each block the other, so
 none can start. Open the named tasks and remove one of the `blockedBy` entries.
+
+## Updating
+
+What changed in each version is in [the changelog](../CHANGELOG.md). Versions follow
+[Semantic Versioning](https://semver.org): while the version starts with `0.`, a change
+to the second number (0.1 → 0.2) may need you to adjust something — a renamed option, a
+changed block syntax — and the changelog says what. A change to the third number
+(0.1.0 → 0.1.1) is safe to take: fixes and additions only.
+
+Settings carry over between versions. When an option is renamed, your saved value is
+moved to the new name automatically.

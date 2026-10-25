@@ -4,8 +4,12 @@
 - [Working in a vault](#working-in-a-vault)
 - [Testing](#testing)
 - [Probing against a real vault](#probing-against-a-real-vault)
+- [Driving Obsidian for screenshots](#driving-obsidian-for-screenshots)
 - [Conventions](#conventions)
+- [Versioning](#versioning)
+- [The changelog](#the-changelog)
 - [Releasing](#releasing)
+- [CI and the supply chain](#ci-and-the-supply-chain)
 
 ## Setup
 
@@ -111,6 +115,7 @@ valuable practice in this project, and it has caught a bug in every phase it was
 | Schedule | Tasks scheduled Saturday to Sunday measure as zero working minutes, so their successors started the same morning — the very conflict the pass exists to remove |
 | Schedule | Levelling reported success against a field no task fills in, and gave up after 5 rounds on a vault that settles in 18 |
 | Levelling UI | "Level resources" silently fixed all 23 pre-existing dependency conflicts too, moving 45 tasks where the overload implicated 11 |
+| `tngantt` blocks (in Obsidian) | A block's timeline stayed blank whenever the note opened in a background tab — reading view detaches and re-attaches sections mid-layout — and a block copied the main view's hidden groups, so `groupBy: none` could show nothing |
 
 The method: write a temporary `tests/*-probe.test.ts` that reads the real vault from
 disk, runs the model, and `console.log`s a summary. Read the numbers, ask whether they
@@ -188,6 +193,68 @@ git -C "$S/vault" status --short          # empty: every byte restored
 An empty `git status` after apply-then-undo across 1361 notes is the strongest
 statement available that the writer is surgical and reversible.
 
+## Driving Obsidian for screenshots
+
+Unit tests cover the pure core; they cannot see a canvas that never drew. The plugin's
+UI has to be looked at, and Obsidian can be driven from a script to do it — no macOS
+Screen Recording or Accessibility permission needed.
+
+Obsidian is an Electron app, so started with a DevTools port it accepts the
+[Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/):
+`Page.captureScreenshot` for screenshots, `Runtime.evaluate` to run code in a window
+(open a note, run a command, read the DOM), `Input.dispatchMouseEvent` for real clicks
+and drags.
+
+```sh
+osascript -e 'quit app "Obsidian"'
+open -a Obsidian --args --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1
+curl -s http://127.0.0.1:9222/json/list      # one "page" target per vault window
+```
+
+A minimal driver, in Node 22+ with its built-in `WebSocket`:
+
+```js
+// node cdp.mjs eval '<js>'  |  node cdp.mjs shot out.png
+const VAULT = 'gantt-test-vault';
+const targets = await (await fetch('http://127.0.0.1:9222/json/list')).json();
+const t = targets.find((x) => x.type === 'page' && x.title.includes(` - ${VAULT} - `));
+const ws = new WebSocket(t.webSocketDebuggerUrl);
+let id = 0; const wait = new Map();
+ws.onmessage = (e) => { const m = JSON.parse(e.data); wait.get(m.id)?.(m); };
+await new Promise((r) => (ws.onopen = r));
+const send = (method, params = {}) =>
+  new Promise((r) => { wait.set(++id, r); ws.send(JSON.stringify({ id, method, params })); });
+const run = async (expr) => (await send('Runtime.evaluate',
+  { expression: expr, awaitPromise: true, returnByValue: true })).result.result.value;
+
+// Refuse to touch any window that is not the test vault.
+if ((await run('app.vault.getName()')) !== VAULT) process.exit(3);
+```
+
+Useful expressions once connected:
+
+```js
+// Reload the plugin after a deploy (there is no Hot Reload plugin in the test vault).
+await app.plugins.disablePlugin('tasknotes-gantt'); await app.plugins.enablePlugin('tasknotes-gantt');
+// Open a note in reading view, in its own tab.
+const leaf = app.workspace.getLeaf('tab');
+await leaf.openFile(app.vault.getFileByPath('Gantt block test.md'), { state: { mode: 'preview' } });
+// Run any command.
+app.commands.executeCommandById('tasknotes-gantt:open-gantt-view');
+```
+
+**Safety.** Bind the port to `127.0.0.1` only, and relaunch Obsidian normally when you
+are done — while the port is open, any local process can control every Obsidian window,
+including vaults you care about. Identify the target window by vault name and check it
+before every action, as the driver above does.
+
+**Measure, then fix.** When something looks wrong, read numbers out of the DOM before
+theorising: a canvas still at the browser's default 300×150 means it was never sized;
+a `ResizeObserver` or `requestAnimationFrame` wrapper installed for one run shows what
+fired and when. The blank-timeline bug was found this way — Obsidian's reading view
+detaches a note's sections within a single frame during layout, which no amount of
+reading the plugin's own code would have revealed.
+
 ## Conventions
 
 - **ESM everywhere** — `"type": "module"`, `.mjs` config files.
@@ -221,21 +288,87 @@ grep -n "detachLeavesOfType" src/main.ts                   # must be empty
 Also: no global `app`, commands do not repeat the plugin name (Obsidian prefixes it),
 settings headings are sentence case, and `onunload` does not detach leaves.
 
+## Versioning
+
+Releases follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). What
+counts as the public interface — the things whose change decides the bump:
+
+- **What the plugin writes into notes**: the baseline property names and their value
+  format, and the `ganttMilestone` flag it reads.
+- **The `tngantt` block syntax**: option names, accepted values, and what they mean.
+- **Settings**: a renamed or removed setting. A rename that `mergeSettings` migrates is
+  not breaking — the user's value carries over.
+- **The CLI**: command names, flags, exit codes, and the JSON output shapes.
+- **The MCP server**: tool names, arguments, and result formats.
+- **The proposal format**: its operations, fields, and `version`.
+- **`minAppVersion`**: raising it is a minor bump. `versions.json` keeps older Obsidian
+  installs on the last release that supported them.
+
+**While the major version is 0** — as now — SemVer allows anything to change, so this
+project narrows it: a breaking change to any of the above bumps the **minor** version
+(0.1 → 0.2) and says so under **Changed** or **Removed**; everything else, features
+included, bumps the **patch**. From 1.0.0 the usual rules apply: breaking is major,
+features are minor, fixes are patch.
+
+A version is never reused. A release that turns out broken is fixed by the next patch,
+and can be marked `[YANKED]` in the changelog.
+
+## The changelog
+
+[CHANGELOG.md](../CHANGELOG.md) follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
+Add entries under `## [Unreleased]` as you work, in **Added**, **Changed**,
+**Deprecated**, **Removed**, **Fixed** or **Security**, written for the person using
+the plugin and ending in a full stop. Do not write entries at release time from the
+commit log; by then the reasons are gone.
+
+One departure from the Keep a Changelog examples: tags are bare versions (`0.1.1`, not
+`v0.1.1`), because Obsidian installs from the release whose tag equals `manifest.json`'s
+version exactly. `.npmrc` sets `tag-version-prefix=""` so `npm version` agrees.
+
+`scripts/changelog.mjs` does the mechanical parts, and `tests/changelog.test.ts` holds
+the file to the format in CI:
+
+| Command | Used by | Does |
+| --- | --- | --- |
+| `check` | `preversion` | Refuses to release if `[Unreleased]` is empty or the file is malformed |
+| `release [version]` | `version` | Moves `[Unreleased]` into `## [x.y.z] - date` and updates the compare links |
+| `notes <version>` | release workflow | Prints one version's section, published as the GitHub release notes |
+| `lint` | by hand | Lists format problems |
+
 ## Releasing
 
-1. Update `CHANGELOG.md`.
-2. `npm version <patch|minor|major>` — the `version` lifecycle script runs
-   `version-bump.mjs`, which writes `manifest.json` and `versions.json` and stages both.
-3. `git push --follow-tags`.
+```sh
+npm version patch        # or minor, or major — see Versioning
+git push --follow-tags
+```
 
-The tag-triggered release workflow builds and attaches `main.js`, `manifest.json` and
-`styles.css` to a GitHub release. CI runs `npm audit`, lint, tests and the build on
-every push, and checks all three bundles were produced. The release job refuses to
-publish if the tag does not match `manifest.json`'s version.
+`npm version` refuses to run on a dirty tree. Then, in order:
 
-Actions are pinned to full commit SHAs rather than tags, since a tag can be moved to
-point at different code. Dependabot (`.github/dependabot.yml`) proposes updates to the
-pins and to npm dependencies weekly. Node 22.12 or later is required — vitest 5 will
-not run on anything older.
+1. **`preversion`** checks the changelog has something under `[Unreleased]` and runs
+   the full test suite. Either failing stops the release before any file changes.
+2. npm bumps `package.json`.
+3. **`version`** writes the new version into `manifest.json` and `versions.json`, and
+   moves `[Unreleased]` into a dated section of `CHANGELOG.md`.
+4. npm commits all of it as one commit named after the version, and tags it — `0.1.1`,
+   with no `v`.
 
-`main.js` is gitignored; it is a build artifact, produced by the release workflow.
+Pushing the tag starts the **release workflow**, which runs the audit and the tests
+again, builds, refuses to continue if the tag and `manifest.json` disagree or the
+changelog has no section for the version, and publishes `main.js`, `manifest.json` and
+`styles.css` with that changelog section as the release notes.
+
+**If a release fails** after the tag is pushed, fix the cause and release the next
+patch. Do not move or reuse the tag — anyone who saw it has the old one.
+
+## CI and the supply chain
+
+CI runs `npm audit`, lint, the tests and the build on every push and pull request, and
+checks all three bundles were produced. Actions are pinned to full commit SHAs rather
+than tags, since a tag can be moved to point at different code; workflows have
+read-only permissions except the step that publishes a release; the checkout token is
+not left in `.git/config`. Dependabot (`.github/dependabot.yml`) proposes updates to
+the pins and to npm dependencies weekly.
+
+Node 22.12 or later is required — vitest 5 will not run on anything older.
+
+`main.js` and `bin/` are gitignored; they are build artifacts.

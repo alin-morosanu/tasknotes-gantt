@@ -8,16 +8,20 @@ the plan those fields already describe — and lets you change it by dragging.
 
 ## What it does
 
-- **Two surfaces.** A Bases view that inherits any `.base` file's filters, and a
-  standalone tab covering the whole vault.
+- **Three surfaces.** A Bases view that inherits any `.base` file's filters, a
+  standalone tab covering the whole vault, and a `tngantt` block that draws a live
+  chart inside any note.
 - **Editing.** Drag to reschedule, drag ends to resize, Shift-drag to create
   dependencies. All four ICS relation types.
 - **Critical path** with float, dependency-conflict detection, cycle reporting, and
   optional cascade — with one-click fixes for conflicts and circular chains.
-- **Capacity.** A daily load histogram per group, against per-resource capacity.
+- **Capacity.** A daily load histogram per group against per-resource capacity, and
+  one-click levelling that pushes work off overloaded days without breaking a
+  dependency.
 - **Baselines** with variance, and progress from checklists, tracked time or status.
-- **Filtering.** Facets for project, status, priority, context, tag, assignee and your
-  own TaskNotes user fields — ANDed across facets, ORed within them.
+- **Filtering.** Facets for project, status, priority, context, tag, the resource
+  property and your own TaskNotes user fields — an `initiative` field, say, to plan
+  several related projects together. ANDed across facets, ORed within them.
 - **Export** to SVG, PNG, CSV or Mermaid.
 - **AI-operable.** A headless CLI and an MCP server over the same scheduling engine, so
   an agent can read the plan, propose changes, check what they would break, and write
@@ -26,6 +30,15 @@ the plan those fields already describe — and lets you change it by dragging.
   write path.
 
 Full keyboard control, pinch to zoom on touch, and a print stylesheet.
+
+A project note can carry its own live timeline:
+
+````markdown
+```tngantt
+project: Website Relaunch
+zoom: week
+```
+````
 
 ## Documentation
 
@@ -38,6 +51,9 @@ Full keyboard control, pinch to zoom on touch, and a print stylesheet.
 | [Development](docs/development.md) | Build, test, deploy to a vault, conventions, releasing |
 | [TaskNotes integration](docs/tasknotes-integration.md) | Every assumption about TaskNotes, and what happens when one fails |
 | [Backlog](docs/backlog.md) | Deferred work, and why it was deferred |
+| [Changelog](CHANGELOG.md) | What changed in each version |
+| [Contributing](CONTRIBUTING.md) | How to propose a change |
+| [Security](SECURITY.md) | How to report a vulnerability, and what the plugin can and cannot touch |
 
 ## Planning with an AI
 
@@ -46,8 +62,12 @@ cycle detection — is also reachable outside Obsidian, so an AI agent can plan 
 the same numbers you see on screen rather than re-deriving them from 160 markdown files
 and getting it wrong.
 
+The CLI and MCP server are not part of the plugin download — they run with Node, from
+a clone of this repository:
+
 ```sh
-npm run build
+git clone https://github.com/alin-morosanu/tasknotes-gantt && cd tasknotes-gantt
+npm ci && npm run build
 
 node bin/tng.mjs doctor    --vault ~/vault --project "PRJ-06"
 node bin/tng.mjs schedule  --vault ~/vault --project "PRJ-06" --start 2026-05-04 --out p.json
@@ -82,9 +102,24 @@ read the diff.
 
 ## Install
 
-Not yet in the community plugin browser. To install manually, copy `main.js`,
-`manifest.json` and `styles.css` into `.obsidian/plugins/tasknotes-gantt/` in your
-vault, then enable it in **Settings → Community plugins**.
+**From the community plugin browser** (once listed): **Settings → Community plugins →
+Browse**, search for *TaskNotes Gantt*, install, and enable.
+
+**Manually:** download `main.js`, `manifest.json` and `styles.css` from the
+[latest release](https://github.com/alin-morosanu/tasknotes-gantt/releases/latest)
+into `<vault>/.obsidian/plugins/tasknotes-gantt/`, then enable the plugin in
+**Settings → Community plugins**. (`.obsidian` is the default name of the vault's
+config folder; use yours if you have renamed it.)
+
+TaskNotes must be installed and enabled for editing. Without it the chart is read-only.
+
+## Versioning
+
+Releases follow [Semantic Versioning](https://semver.org), and every change is recorded
+in the [changelog](CHANGELOG.md) in [Keep a Changelog](https://keepachangelog.com)
+format. While the version starts with `0.`, a minor bump (0.1 → 0.2) may need you to
+adjust something, and the changelog says what; a patch bump (0.1.0 → 0.1.1) is always
+safe to take.
 
 ## How it stores data
 
@@ -121,7 +156,8 @@ OBSIDIAN_VAULT=/path/to/scratch-vault npm run dev
 ```
 
 Use a scratch vault — this plugin writes to task notes. See
-[Development](docs/development.md) for the full setup.
+[Development](docs/development.md) for the full setup, and
+[Contributing](CONTRIBUTING.md) before opening a pull request.
 
 ## Privacy
 

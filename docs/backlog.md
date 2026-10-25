@@ -28,9 +28,10 @@ for other people or for one vault" — worth answering before designing a distri
 ## PNG and print verification
 
 The SVG-to-PNG rasteriser and the print stylesheet are implemented but have only been
-exercised against unit tests and a stubbed environment. They need checking in a real
-Obsidian session before release. (Levelling has now been run against the real vault
-through `tng schedule --level`: a 108-task initiative on one lane settles in 18 rounds.)
+exercised against unit tests and a stubbed environment — the one part of the UI not yet
+seen working in a real Obsidian session. [Driving Obsidian for
+screenshots](development.md#driving-obsidian-for-screenshots) can now do this from a
+script: run the export command, then open the resulting PNG.
 
 ## Write project rollup dates back to project notes
 
@@ -50,3 +51,10 @@ has no tests, along with the views, the bridge adapters and the settings tab. Th
 core underneath is thoroughly covered, which is the layering working as intended, but
 the shell is now large enough that "untested by design" and "untested by drift" are
 hard to tell apart.
+
+The DevTools approach in [Driving Obsidian](development.md#driving-obsidian-for-screenshots)
+is the likeliest route: a scripted smoke test that opens the test vault, renders a
+chart and a `tngantt` block, and asserts on the DOM — the checks that found three bugs
+by hand — could run before each release.
+
+**Why deferred:** it needs a running Obsidian, so it cannot run in CI as things stand.
