@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Read-only by default. Nothing in CI needs to write to the repository.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to a full commit SHA, not a tag: a tag can be moved to point
+      # at different code, a commit cannot. Dependabot proposes updates to the pins.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job never pushes, so the token is not left in .git/config for later
+          # steps — or anything those steps install — to find.
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      # All three artefacts, not only the plugin: the CLI and MCP server are separate
+      # bundles and could fail to build without the plugin noticing.
+      - run: test -s main.js && test -s bin/tng.mjs && test -s bin/tng-mcp.mjs

@@ -1,0 +1,11 @@
+node_modules/
+main.js
+*.js.map
+.DS_Store
+.env
+bin/
+# Editor swap files and local session notes — they can hold vault content.
+*.swp
+.swp
+*.swo
+session.txt

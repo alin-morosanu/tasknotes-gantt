@@ -1,0 +1,42 @@
+{
+  "name": "tasknotes-gantt",
+  "version": "0.1.0",
+  "description": "Professional Gantt chart and project planning for Obsidian TaskNotes.",
+  "main": "main.js",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit -skipLibCheck && tsc -p tsconfig.mcp.json && node esbuild.config.mjs production",
+    "deploy": "node scripts/deploy.mjs",
+    "cli": "node bin/tng.mjs",
+    "mcp": "node bin/tng-mcp.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "keywords": [
+    "obsidian",
+    "tasknotes",
+    "gantt",
+    "project-management",
+    "timeline"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "@types/node": "^22.15.17",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.0",
+    "obsidian": "latest",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.5",
+    "yaml": "^2.9.0",
+    "zod": "^4.6.7"
+  }
+}

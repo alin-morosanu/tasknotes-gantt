@@ -1,0 +1,15 @@
+# Keeps the SHA-pinned actions and the npm toolchain current. A pin nobody updates
+# goes stale and misses security fixes; this turns updates into reviewable PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      development:
+        dependency-type: development

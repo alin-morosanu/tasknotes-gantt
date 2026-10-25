@@ -1,0 +1,695 @@
+/*
+ * TaskNotes Gantt styles.
+ *
+ * Colors come exclusively from Obsidian's CSS variables so the chart follows the
+ * user's active theme in both light and dark, including community themes.
+ * Class prefix: `tng-`.
+ */
+
+.tng-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+.tng-view-bases {
+  /* Bases supplies its own toolbar above us, so the chart takes the whole pane. */
+  height: 100%;
+}
+
+.tng-banners {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-2);
+  padding: var(--size-2-2) var(--size-4-2);
+}
+
+/* ---------- toolbar ---------- */
+
+.tng-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-2);
+  flex-wrap: wrap;
+}
+
+.tng-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--size-2-1) var(--size-2-2);
+  border-radius: var(--radius-s);
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.tng-toolbar-button:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.tng-toolbar-button.is-active {
+  color: var(--text-accent);
+  border-color: var(--background-modifier-border);
+  background-color: var(--background-modifier-hover);
+}
+
+.tng-toolbar-select {
+  font-size: var(--font-ui-smaller);
+  padding: var(--size-2-1) var(--size-2-2);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.tng-toolbar-divider {
+  width: 1px;
+  height: 18px;
+  background-color: var(--background-modifier-border);
+  margin: 0 var(--size-2-1);
+}
+
+/* ---------- banner ---------- */
+
+.tng-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  padding: var(--size-2-2) var(--size-4-2);
+  border: 1px solid var(--background-modifier-border);
+  border-left: 3px solid var(--text-muted);
+  border-radius: var(--radius-s);
+  background-color: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  line-height: 1.4;
+}
+
+.tng-banner-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/*
+ * The fix is offered, never taken automatically. A plan that silently rearranged
+ * itself would be worse than one that points at its own contradictions.
+ */
+.tng-banner-action {
+  flex: 0 0 auto;
+  padding: var(--size-2-1) var(--size-4-1);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tng-banner-action:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+/* A statement of fact about what the chart is doing, not a problem to act on. */
+.tng-banner-info {
+  border-left-color: var(--text-faint);
+  color: var(--text-muted);
+}
+
+.tng-banner-warn {
+  border-left-color: var(--text-warning);
+}
+
+.tng-banner-error {
+  border-left-color: var(--text-error);
+  color: var(--text-normal);
+}
+
+/* ---------- chart ---------- */
+
+.tng-chart-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.tng-chart {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
+.tng-timeline {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---------- task grid ---------- */
+
+.tng-grid {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--background-modifier-border);
+  background-color: var(--background-primary);
+}
+
+.tng-grid-header {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  background-color: var(--background-secondary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+  padding-bottom: 4px;
+}
+
+.tng-grid-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.tng-grid-rows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.tng-grid-row {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-normal);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.tng-grid-row:hover,
+.tng-grid-row.is-hovered {
+  background-color: var(--background-modifier-hover);
+}
+
+.tng-grid-row.is-selected {
+  background-color: var(--background-modifier-active-hover, var(--background-modifier-hover));
+  box-shadow: inset 2px 0 0 var(--interactive-accent);
+}
+
+.tng-grid-row.is-group {
+  background-color: var(--background-secondary);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+}
+
+.tng-grid-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tng-grid-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tng-grid-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tng-grid-date {
+  flex: 0 0 58px;
+  justify-content: flex-end;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * An inferred date is a guess the chart made, not something the user entered.
+ * It is dimmed and italic so the grid never passes one off as authored.
+ */
+.tng-grid-row.is-capacity {
+  background-color: var(--background-primary-alt, var(--background-secondary));
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.tng-load-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.tng-load-icon .svg-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.tng-grid-date.is-over {
+  color: var(--text-error);
+  font-weight: var(--font-medium);
+}
+
+.tng-grid-float {
+  flex: 0 0 46px;
+  justify-content: flex-end;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tng-grid-float.is-critical {
+  color: var(--color-orange, var(--text-warning));
+  font-weight: var(--font-medium);
+}
+
+.tng-grid-float.is-over {
+  color: var(--text-error);
+}
+
+.tng-grid-float.is-ahead {
+  color: var(--text-success, var(--color-green));
+}
+
+.tng-grid-float.is-unknown {
+  color: var(--text-faint);
+}
+
+.tng-grid-date.is-inferred {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.tng-status-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.tng-status-dot.is-complete {
+  opacity: 0.45;
+}
+
+.tng-twisty {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-faint);
+}
+
+.tng-twisty:hover {
+  color: var(--text-normal);
+}
+
+.tng-twisty .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.tng-grid-warn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--text-warning);
+}
+
+.tng-grid-warn .svg-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.tng-grid-linked {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.tng-grid-linked .svg-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.tng-grid-count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: var(--radius-s);
+  background-color: var(--background-modifier-border);
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}
+
+.tng-splitter {
+  flex: 0 0 auto;
+  width: 4px;
+  margin-left: -2px;
+  cursor: col-resize;
+  background-color: transparent;
+  z-index: 2;
+}
+
+.tng-splitter:hover,
+.tng-splitter:active {
+  background-color: var(--interactive-accent);
+}
+
+.tng-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/*
+ * The scroll layer sits above the canvas and owns both scrolling and pointer input,
+ * while the canvas paints from its scroll offsets. This gives native momentum
+ * scrolling and native scrollbars without the canvas needing to be as large as the
+ * whole timeline. Its `top` is set in script to clear the ruler.
+ */
+.tng-scroll {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: auto;
+}
+
+.tng-spacer {
+  /* Sized in script to the full extent of the chart, purely to drive the scrollbars. */
+  pointer-events: none;
+}
+
+/*
+ * Screen-reader mirror of the visible rows.
+ *
+ * Canvas content is invisible to assistive technology, so the rows are also emitted as
+ * real DOM here. Clipped rather than `display: none`, which would hide it from screen
+ * readers too.
+ */
+.tng-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tng-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------- confirmation dialog ---------- */
+
+.tng-confirm-summary {
+  color: var(--text-muted);
+  margin-top: 0;
+}
+
+.tng-confirm-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background-color: var(--background-secondary);
+  padding: var(--size-2-2);
+}
+
+.tng-confirm-item {
+  font-size: var(--font-ui-smaller);
+  font-family: var(--font-monospace);
+  color: var(--text-normal);
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tng-confirm-more {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.tng-setting-compact {
+  padding-top: var(--size-2-1);
+  padding-bottom: var(--size-2-1);
+  border-top: none;
+}
+
+/* ---------- keyboard focus ---------- */
+
+.tng-scroll:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+/* ---------- touch ---------- */
+
+/*
+ * Bigger targets on a touch screen. A 7px resize handle is fine for a mouse and
+ * impossible for a finger, so coarse pointers get a taller row and a taller bar.
+ */
+@media (pointer: coarse) {
+  .tng-grid-row {
+    min-height: 36px;
+  }
+
+  .tng-toolbar-button {
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  .tng-splitter {
+    width: 10px;
+    margin-left: -5px;
+  }
+}
+
+/* ---------- print ---------- */
+
+/*
+ * Printing a canvas prints whatever is on screen, so the chart is reproduced as-is
+ * rather than reflowed. The surrounding chrome is dropped and the ink is forced dark,
+ * since a dark theme prints as a solid black page otherwise.
+ */
+@media print {
+  .tng-toolbar,
+  .tng-splitter {
+    display: none !important;
+  }
+
+  .tng-view {
+    height: auto;
+    overflow: visible;
+  }
+
+  .tng-banner {
+    border: 1px solid #999;
+    color: #000;
+    background: none;
+  }
+
+  .tng-grid-row,
+  .tng-grid-header {
+    color: #000;
+    background: none;
+  }
+
+  .tng-scroll {
+    overflow: visible;
+  }
+}
+
+/* ---------- filter bar ---------- */
+
+.tng-filterbar {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-2);
+  flex-wrap: wrap;
+}
+
+.tng-filter-search {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  padding: 0 var(--size-2-2);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background-color: var(--background-primary);
+}
+
+.tng-filter-search-icon {
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.tng-filter-search-icon .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.tng-filter-input {
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: var(--size-2-1) 0;
+  min-width: 0;
+  width: 160px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-normal);
+}
+
+.tng-filter-input:focus {
+  box-shadow: none;
+}
+
+/*
+ * A flex item will not shrink below its own content unless told to. Without
+ * `min-width: 0` this row sizes itself to every chip laid end to end, so its own
+ * `flex-wrap` never fires: the facets simply run off the pane and the last ones —
+ * the user's own fields, which are appended last — become unreachable.
+ */
+.tng-filter-facets {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tng-filter-facet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--size-2-1) var(--size-2-2);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  background-color: var(--background-primary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.tng-filter-facet:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.tng-filter-facet.is-active {
+  border-color: var(--interactive-accent);
+  color: var(--text-normal);
+}
+
+.tng-filter-facet-value {
+  padding: 0 5px;
+  border-radius: var(--radius-s);
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tng-filter-facet-caret {
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.tng-filter-facet-caret .svg-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.tng-filter-clear.is-active {
+  color: var(--text-accent);
+}
+
+/* ---------- group visibility ---------- */
+
+.tng-group-check {
+  flex: 0 0 auto;
+  margin: 0 2px 0 0;
+  cursor: pointer;
+}
+
+/*
+ * A switched-off group keeps its header so it can be switched back on, but recedes
+ * so the groups still in play read as the content.
+ */
+.tng-grid-row.is-hidden-group {
+  opacity: 0.5;
+}
+
+/* ---------- embedded chart (```tngantt```) ---------- */
+
+/*
+ * A code block has no natural height, and the canvas sizes itself to its container —
+ * so without an explicit height the chart renders zero pixels tall and reads as a
+ * broken block. The height comes from the block body; this only sets the frame.
+ */
+.tng-embed {
+  margin: var(--size-4-2) 0;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.tng-embed-chart {
+  position: relative;
+  width: 100%;
+}
+
+.tng-embed-empty,
+.tng-embed-error {
+  padding: var(--size-4-3);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.tng-embed-error {
+  color: var(--text-error);
+}
+
+.tng-embed-error-title {
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--size-4-1);
+}
+
+.tng-embed-error ul {
+  margin: 0;
+  padding-left: var(--size-4-4);
+}
+
+/* Reading view is not the place for a chart to grab the page's scroll. */
+.tng-embed .tng-scroll {
+  overscroll-behavior: contain;
+}
