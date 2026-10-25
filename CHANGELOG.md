@@ -51,6 +51,15 @@
 
 ### Fixed
 
+- A `tngantt` block could render its task list beside a blank timeline. The chart was
+  drawn while Obsidian's reading view had the note's sections momentarily detached,
+  measured as zero wide, and nothing triggered a redraw because the chart came back at
+  the same size. Charts now redraw when their size changes and retry a draw that
+  catches them detached.
+- A `tngantt` block inherited the main view's switched-off groups, so a block with
+  `groupBy: none` in a vault whose main view hid the ungrouped bucket showed no tasks.
+- Error messages in a `tngantt` block render quoted options as code instead of literal
+  backticks.
 - Choosing a resource property that TaskNotes maps onto the task itself — `contexts`,
   `projects`, `status` — worked for the load chart and silently did nothing for the
   filter facet and the resource grouping, which read only unmapped properties. All

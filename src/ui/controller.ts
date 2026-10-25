@@ -72,6 +72,9 @@ import type { GanttWriter } from '../bridge/writer';
  * where model output becomes pixels.
  */
 
+/** About a second of frames: long enough to outlast a re-layout, short enough not to spin. */
+const MAX_DETACHED_RETRIES = 60;
+
 export interface ControllerHost {
   app: App;
   settings: GanttSettings;
@@ -160,6 +163,16 @@ export class GanttController {
   private adjacency = buildAdjacency([], []);
   private frame = 0;
   private disposed = false;
+  /**
+   * Redraws whenever the timeline changes size.
+   *
+   * A chart can be built before its container has been laid out — a code block in a
+   * note is rendered before Obsidian inserts it into the page — and a draw at zero
+   * width is skipped. Without this the canvas stayed at the browser's default 300x150
+   * with nothing on it, because the only other redraw trigger was a window resize.
+   */
+  private resizeObserver: ResizeObserver | null = null;
+  private detachedRetries = 0;
 
   constructor(
     private host: ControllerHost,
@@ -207,6 +220,8 @@ export class GanttController {
 
     this.timelineEl = this.rootEl.createDiv({ cls: 'tng-timeline' });
     this.canvas = this.timelineEl.createEl('canvas', { cls: 'tng-canvas' });
+    this.resizeObserver = new ResizeObserver(() => this.requestRender());
+    this.resizeObserver.observe(this.timelineEl);
 
     // The scroll layer sits ON TOP of the canvas and owns both scrolling and pointer
     // input, so every interaction listener belongs here — a listener on the canvas
@@ -1366,8 +1381,25 @@ export class GanttController {
   }
 
   private render(): void {
+    // Obsidian's reading view detaches a note's sections and re-attaches them within a
+    // single frame while it lays the note out. A draw landing in that gap measures a
+    // detached element as zero wide and gives up — and because the chart comes back at
+    // exactly the size the resize observer last reported, the observer never fires
+    // again. The chart stayed blank until something happened to resize it. So a draw
+    // that finds the chart detached tries again next frame, a bounded number of times.
+    if (!this.timelineEl.isConnected) {
+      if (this.detachedRetries < MAX_DETACHED_RETRIES) {
+        this.detachedRetries += 1;
+        this.requestRender();
+      }
+      return;
+    }
+    this.detachedRetries = 0;
+
     const width = this.timelineEl.clientWidth;
     const height = this.timelineEl.clientHeight;
+    // Attached but zero-sized means hidden — an inactive tab, or the editor-mode copy
+    // of a code block. The resize observer reports when that changes.
     if (width === 0 || height === 0) return;
 
     const ctx = prepareCanvas(this.canvas, width, height);
@@ -1425,6 +1457,8 @@ export class GanttController {
 
   dispose(): void {
     this.disposed = true;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     if (this.frame !== 0) window.cancelAnimationFrame(this.frame);
     this.scrollEl.removeEventListener('scroll', this.onScroll);
     this.scrollEl.removeEventListener('pointerdown', this.onPointerDown);

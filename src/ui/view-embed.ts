@@ -84,7 +84,16 @@ export class GanttEmbed extends MarkdownRenderChild {
       return;
     }
 
-    this.settings = { ...this.plugin.settings, ...config.settings, filter: resolved.filter };
+    // Inherit the user's calendar and display preferences, but not the main view's
+    // state. Groups switched off there are not switched off here: with `groupBy: none`
+    // every task sits in the ungrouped bucket, and a block in a vault whose main view
+    // had hidden that bucket rendered an empty chart with no explanation.
+    this.settings = {
+      ...this.plugin.settings,
+      ...config.settings,
+      filter: resolved.filter,
+      hiddenGroups: []
+    };
 
     // Rebuilt rather than reused: the block body may have changed the grouping, the
     // filter or whether editing is allowed, and those are read at construction.
@@ -131,7 +140,16 @@ export class GanttEmbed extends MarkdownRenderChild {
     const box = this.containerEl.createDiv({ cls: 'tng-embed-error' });
     box.createDiv({ cls: 'tng-embed-error-title', text: 'Gantt block' });
     const list = box.createEl('ul');
-    for (const problem of problems) list.createEl('li', { text: problem });
+    for (const problem of problems) {
+      // The messages are shared with the CLI, where `backticks` read as code. Rendered
+      // literally here they were noise, so each quoted span becomes a code element.
+      const item = list.createEl('li');
+      problem.split('`').forEach((part, i) => {
+        if (part === '') return;
+        if (i % 2 === 1) item.createEl('code', { text: part });
+        else item.appendText(part);
+      });
+    }
   }
 
   private async openTask(path: string): Promise<void> {
