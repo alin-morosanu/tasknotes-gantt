@@ -5,6 +5,7 @@ import { tasksFromEntries } from '../data/adapter-bases';
 import { buildBanner } from './toolbar';
 import { TFile } from 'obsidian';
 import type { GanttSettings } from '../settings/defaults';
+import { resourceGroupLabel } from '../model/filter';
 
 export const GANTT_BASES_VIEW_TYPE = 'tasknotesGanttChart';
 
@@ -166,9 +167,14 @@ export class GanttBasesView extends BasesView {
   }
 }
 
-/** Option schema shown in the Bases view-options menu. */
-export function ganttViewOptions(_config: BasesViewConfig): unknown[] {
-  return [
+/**
+ * Option schema shown in the Bases view-options menu.
+ *
+ * A factory, so the resource grouping can be labelled after the property the user has
+ * actually chosen each time the menu opens.
+ */
+export function ganttViewOptions(resourceField: () => string) {
+  return (_config: BasesViewConfig): unknown[] => [
     {
       displayName: 'Gantt',
       type: 'group',
@@ -183,7 +189,7 @@ export function ganttViewOptions(_config: BasesViewConfig): unknown[] {
             status: 'Status',
             priority: 'Priority',
             context: 'Context',
-            assignee: 'Assignee',
+            assignee: resourceGroupLabel(resourceField()),
             none: 'No grouping'
           }
         },

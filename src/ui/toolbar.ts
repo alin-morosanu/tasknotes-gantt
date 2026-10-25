@@ -2,6 +2,7 @@ import { setIcon, setTooltip } from 'obsidian';
 import type { GanttController } from './controller';
 import type { GanttSettings } from '../settings/defaults';
 import type { GroupBy, SortKey } from '../render/layout';
+import { resourceGroupLabel } from '../model/filter';
 import { ZOOM_LEVELS, type ZoomLevel } from '../render/timescale';
 
 export interface ToolbarHost {
@@ -86,7 +87,8 @@ export function buildToolbar(containerEl: HTMLElement, host: ToolbarHost): HTMLE
 
   bar.createDiv({ cls: 'tng-toolbar-divider' });
 
-  select(bar, GROUP_LABELS, host.settings.groupBy, 'Group by', (groupBy) =>
+  const groupLabels = { ...GROUP_LABELS, assignee: resourceGroupLabel(host.settings.resourceField) };
+  select(bar, groupLabels, host.settings.groupBy, 'Group by', (groupBy) =>
     host.onChange({ groupBy })
   );
   select(bar, SORT_LABELS, host.settings.sortKey, 'Sort tasks by', (sortKey) =>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resourceValuesOf } from '../src/model/resource';
-import { buildFacets, NO_VALUE, resourceLabel } from '../src/model/filter';
+import { buildFacets, NO_VALUE, resourceGroupLabel, resourceLabel } from '../src/model/filter';
 import { resourceValues, UNASSIGNED } from '../src/model/capacity';
 import { buildRows, DEFAULT_LAYOUT } from '../src/render/layout';
 import { makeTask } from './fixtures/build';
@@ -110,5 +110,19 @@ describe('resourceLabel', () => {
   it('still offers one for a property of the user’s own', () => {
     const facets = buildFacets(CATALOG, 'owner');
     expect(facets.filter((f) => f.id === 'field:owner')).toHaveLength(1);
+  });
+});
+
+describe('resourceGroupLabel', () => {
+  it('reads Assignee for the default property', () => {
+    expect(resourceGroupLabel('assignee')).toBe('Assignee');
+    expect(resourceGroupLabel('')).toBe('Assignee');
+  });
+
+  it('names any other property, so it is never confused with the Context grouping', () => {
+    // It used to read "Assignee" whatever the property was, so a vault measuring
+    // capacity against contexts offered an "Assignee" grouping that grouped by context.
+    expect(resourceGroupLabel('contexts')).toBe('Resource (contexts)');
+    expect(resourceGroupLabel(' owner ')).toBe('Resource (owner)');
   });
 });

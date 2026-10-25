@@ -38,6 +38,18 @@ export interface FilterState {
 
 export const EMPTY_FILTER: FilterState = { text: '', facets: {} };
 
+/**
+ * The label for the grouping that follows the resource property.
+ *
+ * It used to read "Assignee" whatever the property was, so a vault measuring capacity
+ * against `contexts` offered an "Assignee" grouping that grouped by context. Naming the
+ * property keeps it distinct from the built-in Context grouping beside it.
+ */
+export function resourceGroupLabel(field: string): string {
+  const name = field.trim();
+  return name === '' || name === 'assignee' ? 'Assignee' : `Resource (${name})`;
+}
+
 /** A readable name for whichever property is acting as the resource axis. */
 export function resourceLabel(field: string): string {
   if (field === 'assignee') return 'Assignee';

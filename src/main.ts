@@ -257,7 +257,7 @@ export default class TaskNotesGanttPlugin extends Plugin {
       icon: 'chart-gantt',
       factory: (controller, containerEl) => new GanttBasesView(controller, containerEl, this),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      options: ganttViewOptions as any
+      options: ganttViewOptions(() => this.settings.resourceField) as any
     });
 
     if (registered || attempt >= BASES_MAX_ATTEMPTS) return;
