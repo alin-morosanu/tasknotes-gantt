@@ -1,7 +1,7 @@
 {
   "id": "tasknotes-gantt",
   "name": "TaskNotes Gantt",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "1.10.0",
   "description": "Gantt chart, critical path and resource planning for TaskNotes projects.",
   "author": "Alin Morosanu",

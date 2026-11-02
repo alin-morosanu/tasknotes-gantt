@@ -9,6 +9,8 @@ the release whose tag matches `manifest.json` exactly.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-02
+
 ### Added
 
 - Screenshots in the README, taken from a vault of made-up projects that
@@ -65,5 +67,6 @@ First public release.
   the MCP server is bound to one vault and never writes outside it.
 - User guide, agent guide, tools reference, and architecture and development docs.
 
-[unreleased]: https://github.com/alin-morosanu/tasknotes-gantt/compare/0.1.0...HEAD
+[unreleased]: https://github.com/alin-morosanu/tasknotes-gantt/compare/0.1.1...HEAD
+[0.1.1]: https://github.com/alin-morosanu/tasknotes-gantt/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/alin-morosanu/tasknotes-gantt/releases/tag/0.1.0

@@ -1,6 +1,6 @@
 {
   "name": "tasknotes-gantt",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Professional Gantt chart and project planning for Obsidian TaskNotes.",
   "main": "main.js",
   "type": "module",
