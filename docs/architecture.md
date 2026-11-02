@@ -101,6 +101,7 @@ cli/                    Node only. Never imported by the plugin bundle.
 scripts/
   deploy.mjs            Copy a build into $OBSIDIAN_VAULT.
   changelog.mjs         Keep a Changelog: check, release, notes, lint.
+  demo-vault.mjs        Build a vault of made-up projects, for README screenshots.
 
 mcp/
   server.ts             Four tools over cli/session.ts.

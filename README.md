@@ -6,6 +6,8 @@ Gantt chart, critical path and resource planning for
 TaskNotes gives every task a note, real dates and real dependencies. This plugin draws
 the plan those fields already describe — and lets you change it by dragging.
 
+![The Gantt tab showing three projects grouped by project, with dependency arrows between bars, the critical path outlined in orange, a red line marking today, and the start, end and float of every task in the list on the left.](docs/images/gantt-chart.png)
+
 ## What it does
 
 - **Three surfaces.** A Bases view that inherits any `.base` file's filters, a
@@ -18,6 +20,9 @@ the plan those fields already describe — and lets you change it by dragging.
 - **Capacity.** A daily load histogram per group against per-resource capacity, and
   one-click levelling that pushes work off overloaded days without breaking a
   dependency.
+
+  ![Tasks grouped by assignee, each group with a daily load histogram. One of Blake's days is drawn in red at 9.3 hours, and a banner above the chart offers to level it.](docs/images/load-and-levelling.png)
+
 - **Baselines** with variance, and progress from checklists, tracked time or status.
 - **Filtering.** Facets for project, status, priority, context, tag, the resource
   property and your own TaskNotes user fields — an `initiative` field, say, to plan
@@ -39,6 +44,12 @@ project: Website Relaunch
 zoom: week
 ```
 ````
+
+![A project note in reading view with a live tngantt chart under its Timeline heading, showing that project's eight tasks and their dependencies.](docs/images/tngantt-block.png)
+
+The screenshots come from a vault of made-up projects that
+`node scripts/demo-vault.mjs <folder>` builds, so you can try the plugin on the same
+data.
 
 ## Documentation
 

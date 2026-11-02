@@ -9,6 +9,11 @@ the release whose tag matches `manifest.json` exactly.
 
 ## [Unreleased]
 
+### Added
+
+- Screenshots in the README, taken from a vault of made-up projects that
+  `scripts/demo-vault.mjs` builds.
+
 ### Changed
 
 - The grouping that follows the resource property is named after it — "Resource

@@ -255,6 +255,42 @@ fired and when. The blank-timeline bug was found this way — Obsidian's reading
 detaches a note's sections within a single frame during layout, which no amount of
 reading the plugin's own code would have revealed.
 
+### Screenshots for the README
+
+Never from a real vault: a screenshot of one publishes real names, plans and tab titles.
+`scripts/demo-vault.mjs` builds a vault of made-up projects instead, with dates computed
+from the day it runs so the plan always straddles today:
+
+```sh
+TASKNOTES_FROM=../gantt-test-vault node scripts/demo-vault.mjs ../gantt-demo-vault
+OBSIDIAN_VAULT=../gantt-demo-vault npm run build
+```
+
+`TASKNOTES_FROM` copies the TaskNotes plugin files from a vault that has it installed;
+its settings are written from scratch, because a real `data.json` carries API and
+calendar tokens. The script refuses to write into a non-empty folder it did not create.
+
+You do not need to quit your own Obsidian for this. A second instance with its own
+profile directory knows only about the vaults listed in that profile, so it opens the
+demo vault and nothing else:
+
+```sh
+P=$(mktemp -d)
+echo '{"vaults":{"demo":{"path":"'"$PWD"'/../gantt-demo-vault","ts":0,"open":true}}}' > "$P/obsidian.json"
+/Applications/Obsidian.app/Contents/MacOS/Obsidian --user-data-dir="$P" \
+  --remote-debugging-port=9223 --remote-debugging-address=127.0.0.1 &
+```
+
+A new vault opens in restricted mode; `await app.plugins.setEnable(true)` and
+`app.plugins.enablePluginAndSave(id)` for `tasknotes` and `tasknotes-gantt` turn the
+plugins on. Then fix the viewport with
+`Emulation.setDeviceMetricsOverride({ width: 1400, height: 940, deviceScaleFactor: 2 })`,
+collapse both sidebars, and clip `Page.captureScreenshot` to
+`.workspace-leaf.mod-active .view-content`. In reading view a note has two copies of a
+`tngantt` block (the hidden editor renders one too), so select the one under
+`.markdown-reading-view`. Downscale to 1800 px wide with
+`sips --resampleWidth 1800` and save under `docs/images/`.
+
 ## Conventions
 
 - **ESM everywhere** — `"type": "module"`, `.mjs` config files.
