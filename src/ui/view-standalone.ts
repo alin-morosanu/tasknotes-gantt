@@ -100,6 +100,8 @@ export class GanttStandaloneView extends ItemView {
     this.controller?.refresh();
     // Grouping and the assignee field both change which facets exist.
     this.filterBar?.render();
+    // The load chart and resource property decide which capacity banners apply.
+    this.renderBanners();
   }
 
   private async applyFilter(next: GanttSettings['filter']): Promise<void> {
@@ -108,6 +110,8 @@ export class GanttStandaloneView extends ItemView {
     // Re-filter what is already loaded rather than re-reading the vault.
     this.controller?.applyCurrentFilter();
     this.filterBar?.setFilter(next);
+    // Filtering changes the set the load chart measures, and so its banners.
+    this.renderBanners();
   }
 
   private async openTask(path: string): Promise<void> {

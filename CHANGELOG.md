@@ -23,6 +23,9 @@ the release whose tag matches `manifest.json` exactly.
   `groupBy: none` showed no tasks when the main view had hidden the ungrouped bucket.
 - Error messages in a `tngantt` block show quoted options as code instead of literal
   backticks.
+- Switching the load chart on from the toolbar now shows its banner and the **Level
+  them** button straight away, instead of only after the next change to a note. The
+  banners also follow filter changes.
 
 ## [0.1.0] - 2026-10-25
 
